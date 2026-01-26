@@ -15,7 +15,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             },
             loginMethods: ['google'],
             embeddedWallets: {
-              createOnLogin: 'off',
+              solana: {
+                createOnLogin: 'off',
+              },
             },
           }}
         >
