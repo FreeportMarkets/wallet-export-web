@@ -8,11 +8,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body style={{ margin: 0, backgroundColor: '#0A0A0B', minHeight: '100vh' }}>
         <PrivyProvider
           appId="cmhpi6h9x002tl50cus1kfdah"
+          clientId="client-WY6SVru3DDccrifgfLhzK1hXZ63Rmte6U57pdPvSF2yCm"
           config={{
             appearance: {
               theme: 'dark',
               accentColor: '#07E6D7',
             },
+            loginMethods: ['google'],
             embeddedWallets: {
               createOnLogin: 'off',
             },

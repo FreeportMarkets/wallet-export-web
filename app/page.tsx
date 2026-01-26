@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { usePrivy, useSolanaWallets } from '@privy-io/react-auth';
 
 export default function ExportWalletPage() {
   const { ready, authenticated, user, login, logout } = usePrivy();
-  const { exportWallet } = useSolanaWallets();
+  const { wallets, exportWallet } = useSolanaWallets();
+  const [error, setError] = useState<string | null>(null);
 
   const solanaWallet = user?.linkedAccounts?.find(
     (account: any) =>
@@ -47,16 +49,41 @@ export default function ExportWalletPage() {
             <p style={styles.label}>Wallet Address</p>
             <p style={styles.address}>{solanaWallet.address}</p>
 
-            <button style={styles.button} onClick={() => exportWallet()}>
+            <button
+              style={styles.button}
+              onClick={async () => {
+                setError(null);
+                try {
+                  // Find the embedded wallet from useSolanaWallets
+                  const embeddedWallet = wallets.find(w => w.walletClientType === 'privy');
+                  if (embeddedWallet) {
+                    await exportWallet({ address: embeddedWallet.address });
+                  } else {
+                    setError('No embedded wallet found. Wallets: ' + JSON.stringify(wallets.map(w => ({ type: w.walletClientType, address: w.address }))));
+                  }
+                } catch (err: any) {
+                  setError(err?.message || String(err));
+                }
+              }}
+            >
               Export Private Key
             </button>
+
+            {error && <p style={styles.errorText}>{error}</p>}
 
             <p style={styles.warning}>
               Never share your private key with anyone.
             </p>
           </>
         ) : (
-          <p style={styles.text}>No Solana wallet found for this account.</p>
+          <p style={styles.text}>
+            No Solana wallet found for this account.
+            {wallets.length > 0 && (
+              <span style={{ display: 'block', marginTop: 8, fontSize: 11 }}>
+                Found wallets: {wallets.map(w => w.walletClientType).join(', ')}
+              </span>
+            )}
+          </p>
         )}
 
         <button style={styles.logoutButton} onClick={logout}>
@@ -129,6 +156,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#F59E0B',
     fontSize: '12px',
     marginBottom: '24px',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: '12px',
+    marginBottom: '16px',
+    padding: '8px',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderRadius: '8px',
+    wordBreak: 'break-word',
   },
   logoutButton: {
     backgroundColor: 'transparent',
