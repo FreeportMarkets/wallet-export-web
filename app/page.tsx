@@ -10,11 +10,11 @@ export default function ExportWalletPage() {
   const [error, setError] = useState<string | null>(null);
 
   const solanaWallet = user?.linkedAccounts?.find(
-    (account: any) =>
+    (account): account is WalletWithMetadata =>
       account.type === 'wallet' &&
       account.walletClientType === 'privy' &&
       account.chainType === 'solana'
-  ) as { address: string } | undefined;
+  );
 
   if (!ready) {
     return (
@@ -55,7 +55,7 @@ export default function ExportWalletPage() {
               onClick={async () => {
                 setError(null);
                 try {
-                  await exportWallet({ address: solanaWallet.address });
+                  await exportWallet({ address: solanaWallet?.address });
                 } catch (err: any) {
                   setError(err?.message || String(err));
                 }
