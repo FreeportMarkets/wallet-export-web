@@ -1,3 +1,3 @@
-lives on https://wallet-export-web-virid.vercel.app/
+lives on https://export.freeportmarkets.com/
 
 jason.yang@freeportmarkets.com login
