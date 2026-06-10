@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { usePrivy, type WalletWithMetadata } from '@privy-io/react-auth';
-import { useExportWallet } from '@privy-io/react-auth/solana';
+import { useExportWallet as useExportSolanaWallet } from '@privy-io/react-auth/solana';
 
 export default function ExportWalletPage() {
-  const { ready, authenticated, user, login, logout } = usePrivy();
-  const { exportWallet } = useExportWallet();
+  const { ready, authenticated, user, login, logout, exportWallet: exportEvmWallet } = usePrivy();
+  const { exportWallet: exportSolanaWallet } = useExportSolanaWallet();
   const [error, setError] = useState<string | null>(null);
 
   const solanaWallet = user?.linkedAccounts?.find(
@@ -14,6 +14,13 @@ export default function ExportWalletPage() {
       account.type === 'wallet' &&
       account.walletClientType === 'privy' &&
       account.chainType === 'solana'
+  );
+
+  const evmWallet = user?.linkedAccounts?.find(
+    (account): account is WalletWithMetadata =>
+      account.type === 'wallet' &&
+      account.walletClientType === 'privy' &&
+      account.chainType === 'ethereum'
   );
 
   if (!ready) {
@@ -45,24 +52,49 @@ export default function ExportWalletPage() {
       <div style={styles.card}>
         <h1 style={styles.title}>Export Your Wallet</h1>
 
-        {solanaWallet ? (
+        {solanaWallet || evmWallet ? (
           <>
-            <p style={styles.label}>Wallet Address</p>
-            <p style={styles.address}>{solanaWallet.address}</p>
+            {solanaWallet && (
+              <>
+                <p style={styles.label}>Solana Wallet</p>
+                <p style={styles.address}>{solanaWallet.address}</p>
 
-            <button
-              style={styles.button}
-              onClick={async () => {
-                setError(null);
-                try {
-                  await exportWallet({ address: solanaWallet?.address });
-                } catch (err: any) {
-                  setError(err?.message || String(err));
-                }
-              }}
-            >
-              Export Private Key
-            </button>
+                <button
+                  style={styles.button}
+                  onClick={async () => {
+                    setError(null);
+                    try {
+                      await exportSolanaWallet({ address: solanaWallet.address });
+                    } catch (err: any) {
+                      setError(err?.message || String(err));
+                    }
+                  }}
+                >
+                  Export Solana Private Key
+                </button>
+              </>
+            )}
+
+            {evmWallet && (
+              <>
+                <p style={styles.label}>EVM Wallet</p>
+                <p style={styles.address}>{evmWallet.address}</p>
+
+                <button
+                  style={styles.button}
+                  onClick={async () => {
+                    setError(null);
+                    try {
+                      await exportEvmWallet({ address: evmWallet.address });
+                    } catch (err: any) {
+                      setError(err?.message || String(err));
+                    }
+                  }}
+                >
+                  Export EVM Private Key
+                </button>
+              </>
+            )}
 
             {error && <p style={styles.errorText}>{error}</p>}
 
@@ -71,7 +103,7 @@ export default function ExportWalletPage() {
             </p>
           </>
         ) : (
-          <p style={styles.text}>No Solana wallet found for this account.</p>
+          <p style={styles.text}>No embedded wallet found for this account.</p>
         )}
 
         <button style={styles.logoutButton} onClick={logout}>

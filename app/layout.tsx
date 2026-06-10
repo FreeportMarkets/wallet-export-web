@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               theme: 'dark',
               accentColor: '#07E6D7',
             },
-            loginMethods: ['google', 'apple'],
+            loginMethods: ['google', 'apple', 'email'],
             embeddedWallets: {
               solana: {
                 createOnLogin: 'off',
