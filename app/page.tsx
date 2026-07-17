@@ -124,7 +124,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     boxSizing: 'border-box',
   },
   card: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#16161B',
+    border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: '16px',
     padding: '32px',
     maxWidth: '400px',
@@ -144,7 +145,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '24px',
   },
   label: {
-    color: '#07E6D7',
+    color: '#00C805',
     fontSize: '11px',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
@@ -153,15 +154,15 @@ const styles: { [key: string]: React.CSSProperties } = {
   address: {
     color: '#FFFFFF',
     fontSize: '12px',
-    fontFamily: 'monospace',
-    backgroundColor: '#374151',
+    fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
+    backgroundColor: '#111116',
     padding: '12px',
     borderRadius: '8px',
     marginBottom: '24px',
     wordBreak: 'break-all',
   },
   button: {
-    backgroundColor: '#07E6D7',
+    backgroundColor: '#00C805',
     color: '#0A0A0B',
     border: 'none',
     borderRadius: '12px',
@@ -189,7 +190,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   logoutButton: {
     backgroundColor: 'transparent',
     color: '#9CA3AF',
-    border: '1px solid #374151',
+    border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: '8px',
     padding: '10px 20px',
     fontSize: '14px',
