@@ -2,6 +2,11 @@
 
 import './globals.css';
 import { PrivyProvider } from '@privy-io/react-auth';
+import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana';
+
+// Users who signed up in the app by importing a key log in via SIWE/SIWS with
+// an external wallet (MetaMask, Phantom, ...) that holds that key.
+const solanaConnectors = toSolanaWalletConnectors();
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,8 +19,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             appearance: {
               theme: 'dark',
               accentColor: '#00C805',
+              walletChainType: 'ethereum-and-solana',
             },
-            loginMethods: ['google', 'apple', 'email'],
+            loginMethods: ['google', 'apple', 'email', 'wallet'],
+            externalWallets: {
+              solana: {
+                connectors: solanaConnectors,
+              },
+            },
             embeddedWallets: {
               solana: {
                 createOnLogin: 'off',
