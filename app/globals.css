@@ -293,3 +293,8 @@ body {
   .btn, .copy-btn, .toast { transition: none; }
   .btn-primary:active, .btn-export:active { transform: none; }
 }
+
+.wallet-origin {
+  font-size: 11px;
+  color: var(--dim);
+}

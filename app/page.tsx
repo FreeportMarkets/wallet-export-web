@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { usePrivy, type WalletWithMetadata } from '@privy-io/react-auth';
 import { useExportWallet as useExportSolanaWallet } from '@privy-io/react-auth/solana';
+import { embeddedWallets } from '../lib/embeddedWallets';
 
 function Brand() {
   return (
@@ -30,17 +31,11 @@ export default function ExportWalletPage() {
   const { exportWallet: exportSolanaWallet } = useExportSolanaWallet();
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
-  const [exporting, setExporting] = useState<'solana' | 'evm' | null>(null);
+  const [exporting, setExporting] = useState<string | null>(null);
   const [toast, setToast] = useState(false);
 
-  const solanaWallet = user?.linkedAccounts?.find(
-    (a): a is WalletWithMetadata =>
-      a.type === 'wallet' && a.walletClientType === 'privy' && a.chainType === 'solana'
-  );
-  const evmWallet = user?.linkedAccounts?.find(
-    (a): a is WalletWithMetadata =>
-      a.type === 'wallet' && a.walletClientType === 'privy' && a.chainType === 'ethereum'
-  );
+  const solanaWallets = embeddedWallets(user?.linkedAccounts, 'solana');
+  const evmWallets = embeddedWallets(user?.linkedAccounts, 'ethereum');
 
   const copy = useCallback(async (addr: string) => {
     try {
@@ -57,7 +52,7 @@ export default function ExportWalletPage() {
   const doExport = useCallback(
     async (kind: 'solana' | 'evm', address: string) => {
       setError(null);
-      setExporting(kind);
+      setExporting(address);
       try {
         if (kind === 'solana') await exportSolanaWallet({ address });
         else await exportEvmWallet({ address });
@@ -97,6 +92,10 @@ export default function ExportWalletPage() {
             Log In
           </button>
           <p className="reassure">
+            Signed up by importing a private key? Log in with the wallet option and connect
+            the wallet app that holds that key (e.g. MetaMask or Phantom).
+          </p>
+          <p className="reassure">
             Keys are revealed directly by Privy&apos;s secure enclave. Freeport never sees your
             private key.
           </p>
@@ -105,7 +104,32 @@ export default function ExportWalletPage() {
     );
   }
 
-  const hasWallet = solanaWallet || evmWallet;
+  const hasWallet = solanaWallets.length > 0 || evmWallets.length > 0;
+
+  const renderWallet = (kind: 'solana' | 'evm', w: WalletWithMetadata) => (
+    <section className="wallet" key={w.address}>
+      <div className="wallet-head">
+        <span className="wallet-label">{kind === 'solana' ? 'Solana' : 'EVM'}</span>
+        <span className="wallet-origin">{w.imported ? 'Imported' : 'Created by Freeport'}</span>
+      </div>
+      <div className="addr-row">
+        <span className="addr" title={w.address}>{short(w.address)}</span>
+        <button
+          className={`copy-btn${copied === w.address ? ' copied' : ''}`}
+          onClick={() => copy(w.address)}
+        >
+          {copied === w.address ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <button
+        className="btn btn-export"
+        disabled={exporting !== null}
+        onClick={() => doExport(kind, w.address)}
+      >
+        {exporting === w.address ? <><Spinner /> Revealing…</> : 'Export private key'}
+      </button>
+    </section>
+  );
 
   // ── Logged in ──
   return (
@@ -139,53 +163,8 @@ export default function ExportWalletPage() {
             </div>
 
             <div className="wallets">
-              {solanaWallet && (
-                <section className="wallet">
-                  <div className="wallet-head">
-                    <span className="wallet-label">Solana</span>
-                  </div>
-                  <div className="addr-row">
-                    <span className="addr" title={solanaWallet.address}>{short(solanaWallet.address)}</span>
-                    <button
-                      className={`copy-btn${copied === solanaWallet.address ? ' copied' : ''}`}
-                      onClick={() => copy(solanaWallet.address)}
-                    >
-                      {copied === solanaWallet.address ? 'Copied' : 'Copy'}
-                    </button>
-                  </div>
-                  <button
-                    className="btn btn-export"
-                    disabled={exporting !== null}
-                    onClick={() => doExport('solana', solanaWallet.address)}
-                  >
-                    {exporting === 'solana' ? <><Spinner /> Revealing…</> : 'Export private key'}
-                  </button>
-                </section>
-              )}
-
-              {evmWallet && (
-                <section className="wallet">
-                  <div className="wallet-head">
-                    <span className="wallet-label">EVM</span>
-                  </div>
-                  <div className="addr-row">
-                    <span className="addr" title={evmWallet.address}>{short(evmWallet.address)}</span>
-                    <button
-                      className={`copy-btn${copied === evmWallet.address ? ' copied' : ''}`}
-                      onClick={() => copy(evmWallet.address)}
-                    >
-                      {copied === evmWallet.address ? 'Copied' : 'Copy'}
-                    </button>
-                  </div>
-                  <button
-                    className="btn btn-export"
-                    disabled={exporting !== null}
-                    onClick={() => doExport('evm', evmWallet.address)}
-                  >
-                    {exporting === 'evm' ? <><Spinner /> Revealing…</> : 'Export private key'}
-                  </button>
-                </section>
-              )}
+              {solanaWallets.map((w) => renderWallet('solana', w))}
+              {evmWallets.map((w) => renderWallet('evm', w))}
             </div>
           </>
         ) : (
